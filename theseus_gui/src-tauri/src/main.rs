@@ -3,14 +3,11 @@
     windows_subsystem = "windows"
 )]
 
-use theseus::prelude::*;
-
 mod api;
 
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            api::jre::jre_get_all_jre,
             api::jre::jre_find_jre_18plus_jres,
             api::jre::jre_find_jre_19plus_jres,
             api::jre::jre_find_jre_20plus_jres,
@@ -24,9 +21,6 @@ fn main() {
             api::jre::jre_find_jre_28plus_jres,
             api::jre::jre_find_jre_29plus_jres,
             api::jre::jre_find_jre_30plus_jres,
-
-
-            api::jre::jre_find_jre_17_jres,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
