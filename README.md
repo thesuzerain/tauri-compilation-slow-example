@@ -2,6 +2,8 @@
 
 A stripped down version of Modrinth's 'theseus' launcher using Tauri. This is a temporary repo to demonstrate a compilation slowness issue. This compilation time happens specifically with the tauri compilation procedure. In theseus, we have a 'theseus' backend API library, and 'theseus_gui' (the tauri app)- theseus compiles very quickly, whereas the gui library (which just contains #\[tauri::command\]s that call the API) compiles very slowly.
 
+**ALL relevant code is in `theseus_gui/src_tauri/src`**
+
 The compilation slowness seemss to have a couple interacting factors nested in the API:
 
 - A OnceCell that is gettable from a function
