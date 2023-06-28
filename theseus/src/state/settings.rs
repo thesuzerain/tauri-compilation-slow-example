@@ -73,13 +73,6 @@ impl Settings {
     pub async fn update_java() {
         let res = async {
             let state = State::get().await?;
-            let settings_read = state.settings.write().await;
-
-            if settings_read.java_globals.count() == 0 {
-                drop(settings_read);
-                let java_globals = jre::autodetect_java_globals().await?;
-                state.settings.write().await.java_globals = java_globals;
-            }
 
             Ok::<(), crate::Error>(())
         }

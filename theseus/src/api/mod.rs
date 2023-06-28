@@ -5,8 +5,7 @@ pub mod jre;
 pub mod data {
     pub use crate::state::{
         DirectoryInfo, Hooks,  MemorySettings, 
-        ModrinthProject, ModrinthTeamMember, ModrinthUser, ModrinthVersion,
-         ProjectMetadata, Settings, Theme, WindowSize,
+          Settings, Theme, WindowSize,
     };
 }
 
