@@ -1,4 +1,3 @@
-//! Theseus state management system
 
 use std::sync::Arc;
 use tokio::sync::OnceCell;

@@ -1,5 +1,3 @@
-//! Authentication flow interface
-
 use crate::state::State;
 
 pub async fn do_task() {
