@@ -23,19 +23,19 @@ export async function get_all_jre() {
 // Finds all the installation of Java 7, if it exists
 // Returns [JavaVersion]
 export async function find_jre_8_jres() {
-  return await invoke('jre_find_jre_8_jres')
+  return await invoke('do_command_8_jres')
 }
 
 // Finds the installation of Java 17, if it exists
 // Returns [JavaVersion]
 export async function find_jre_17_jres() {
-  return await invoke('jre_find_jre_17_jres')
+  return await invoke('do_command_17_jres')
 }
 
 // Finds the highest version of Java 18+, if it exists
 // Returns [JavaVersion]
-export async function find_jre_18plus_jres() {
-  return await invoke('jre_find_jre_18plus_jres')
+export async function find_jre_18() {
+  return await invoke('do_command_18do_command_')
 }
 
 // Validates globals. Recommend directing the user to reassigned the globals if this returns false
