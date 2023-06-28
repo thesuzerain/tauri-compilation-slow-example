@@ -1,7 +1,6 @@
 //! Project management + inference
 
 use crate::config::MODRINTH_API_URL;
-use crate::state::Profile;
 use crate::util::fetch::{
     fetch_json, write_cached_icon, FetchSemaphore, IoSemaphore,
 };
@@ -201,7 +200,7 @@ pub enum ProjectMetadata {
 }
 
 #[tracing::instrument(skip(io_semaphore))]
-#[theseus_macros::debug_pin]
+
 async fn read_icon_from_file(
     icon_path: Option<String>,
     cache_dir: &Path,
@@ -251,10 +250,9 @@ async fn read_icon_from_file(
     Ok(None)
 }
 
-#[tracing::instrument(skip(profile, io_semaphore, fetch_semaphore))]
-#[theseus_macros::debug_pin]
+#[tracing::instrument(skip(io_semaphore, fetch_semaphore))]
+
 pub async fn infer_data_from_files(
-    profile: Profile,
     paths: Vec<PathBuf>,
     cache_dir: PathBuf,
     io_semaphore: &IoSemaphore,
@@ -275,42 +273,12 @@ pub async fn infer_data_from_files(
 
     let files_url = format!("{}version_files", MODRINTH_API_URL);
     let updates_url = format!("{}version_files/update", MODRINTH_API_URL);
-    let (files, update_versions) = tokio::try_join!(
-        fetch_json::<HashMap<String, ModrinthVersion>>(
-            Method::POST,
-            &files_url,
-            None,
-            Some(json!({
-                "hashes": file_path_hashes.keys().collect::<Vec<_>>(),
-                "algorithm": "sha512",
-            })),
-            fetch_semaphore,
-        ),
-        fetch_json::<HashMap<String, ModrinthVersion>>(
-            Method::POST,
-            &updates_url,
-            None,
-            Some(json!({
-                "hashes": file_path_hashes.keys().collect::<Vec<_>>(),
-                "algorithm": "sha512",
-                "loaders": [profile.metadata.loader],
-                "game_versions": [profile.metadata.game_version]
-            })),
-            fetch_semaphore,
-        )
-    )?;
-
-    let projects: Vec<ModrinthProject> = fetch_json(
+ 
+     let projects: Vec<ModrinthProject> = fetch_json(
         Method::GET,
         &format!(
-            "{}projects?ids={}",
+            "{}projects?ids=3",
             MODRINTH_API_URL,
-            serde_json::to_string(
-                &files
-                    .values()
-                    .map(|x| x.project_id.clone())
-                    .collect::<Vec<_>>()
-            )?
         ),
         None,
         None,
@@ -342,57 +310,6 @@ pub async fn infer_data_from_files(
     let mut further_analyze_projects: Vec<(String, PathBuf)> = Vec::new();
 
     for (hash, path) in file_path_hashes {
-        if let Some(version) = files.get(&hash) {
-            if let Some(project) =
-                projects.iter().find(|x| version.project_id == x.id)
-            {
-                let file_name = path
-                    .file_name()
-                    .unwrap_or_default()
-                    .to_string_lossy()
-                    .to_string();
-
-                return_projects.insert(
-                    path,
-                    Project {
-                        disabled: file_name.ends_with(".disabled"),
-                        metadata: ProjectMetadata::Modrinth {
-                            project: Box::new(project.clone()),
-                            version: Box::new(version.clone()),
-                            members: teams
-                                .iter()
-                                .filter(|x| x.team_id == project.team)
-                                .cloned()
-                                .collect::<Vec<_>>(),
-                            update_version: if let Some(value) =
-                                update_versions.get(&hash)
-                            {
-                                if value.id != version.id {
-                                    Some(Box::new(value.clone()))
-                                } else {
-                                    None
-                                }
-                            } else {
-                                None
-                            },
-                            incompatible: !version.loaders.contains(
-                                &profile
-                                    .metadata
-                                    .loader
-                                    .as_api_str()
-                                    .to_string(),
-                            ) || version
-                                .game_versions
-                                .contains(&profile.metadata.game_version),
-                        },
-                        sha512: hash,
-                        file_name,
-                    },
-                );
-                continue;
-            }
-        }
-
         further_analyze_projects.push((hash, path));
     }
 

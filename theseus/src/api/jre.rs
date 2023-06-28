@@ -20,7 +20,7 @@ pub const JAVA_18PLUS_KEY: &str = "JAVA_18PLUS";
 pub async fn autodetect_java_globals() -> crate::Result<JavaGlobals> {
     let mut java_8 = find_java8_jres().await?;
     let mut java_17 = find_java17_jres().await?;
-    let mut java_18plus = find_java18plus_jres().await?;
+    // let mut java_18plus = find_java18plus_jres().await?;
 
     // Simply select last one found for initial guess
     let mut java_globals = JavaGlobals::new();
@@ -30,29 +30,29 @@ pub async fn autodetect_java_globals() -> crate::Result<JavaGlobals> {
     if let Some(jre) = java_17.pop() {
         java_globals.insert(JAVA_17_KEY.to_string(), jre);
     }
-    if let Some(jre) = java_18plus.pop() {
-        java_globals.insert(JAVA_18PLUS_KEY.to_string(), jre);
-    }
+    // if let Some(jre) = java_18plus.pop() {
+    //     java_globals.insert(JAVA_18PLUS_KEY.to_string(), jre);
+    // }
 
     Ok(java_globals)
 }
 
 // Searches for jres on the system that are 1.18 or higher
-pub async fn find_java18plus_jres() -> crate::Result<Vec<JavaVersion>> {
+pub async fn find_java18plus_jres() -> crate::Result<()> {
     let version = extract_java_majorminor_version("1.18")?;
     let jres = jre::get_all_jre().await?;
     // Filter out JREs that are not 1.17 or higher
-    Ok(jres
-        .into_iter()
-        .filter(|jre| {
-            let jre_version = extract_java_majorminor_version(&jre.version);
-            if let Ok(jre_version) = jre_version {
-                jre_version >= version
-            } else {
-                false
-            }
-        })
-        .collect())
+    // Ok(jres
+    //     .into_iter()
+    //     .filter(|jre| {
+    //         let jre_version = extract_java_majorminor_version(&jre.version);
+    //         if let Ok(jre_version) = jre_version {
+    //             jre_version >= version
+    //         } else {
+    //             false
+    //         }
+    //     });
+    Ok(())
 }
 
 pub async fn find_java19plus_jres() -> crate::Result<()> {
@@ -111,6 +111,76 @@ pub async fn find_java25plus_jres() -> crate::Result<()> {
     Ok(())
 }
 
+pub async fn find_java26plus_jres() -> crate::Result<()> {
+    let _ = find_java18plus_jres().await?;
+    let _ = find_java19plus_jres().await?;
+    let _ = find_java20plus_jres().await?;
+    let _ = find_java21plus_jres().await?;
+    let _ = find_java22plus_jres().await?;
+    let _ = find_java23plus_jres().await?;
+    let _ = find_java24plus_jres().await?;
+    let _ = find_java25plus_jres().await?;
+    Ok(())
+}
+
+pub async fn find_java27plus_jres() -> crate::Result<()> {
+    let _ = find_java18plus_jres().await?;
+    let _ = find_java19plus_jres().await?;
+    let _ = find_java20plus_jres().await?;
+    let _ = find_java21plus_jres().await?;
+    let _ = find_java22plus_jres().await?;
+    let _ = find_java23plus_jres().await?;
+    let _ = find_java24plus_jres().await?;
+    let _ = find_java25plus_jres().await?;
+    let _ = find_java26plus_jres().await?;
+    Ok(())
+}
+
+pub async fn find_java28plus_jres() -> crate::Result<()> {
+    let _ = find_java18plus_jres().await?;
+    let _ = find_java19plus_jres().await?;
+    let _ = find_java20plus_jres().await?;
+    let _ = find_java21plus_jres().await?;
+    let _ = find_java22plus_jres().await?;
+    let _ = find_java23plus_jres().await?;
+    let _ = find_java24plus_jres().await?;
+    let _ = find_java25plus_jres().await?;
+    let _ = find_java26plus_jres().await?;
+    let _ = find_java27plus_jres().await?;
+    Ok(())
+}
+
+pub async fn find_java29plus_jres() -> crate::Result<()> {
+    let _ = find_java18plus_jres().await?;
+    let _ = find_java19plus_jres().await?;
+    let _ = find_java20plus_jres().await?;
+    let _ = find_java21plus_jres().await?;
+    let _ = find_java22plus_jres().await?;
+    let _ = find_java23plus_jres().await?;
+    let _ = find_java24plus_jres().await?;
+    let _ = find_java25plus_jres().await?;
+    let _ = find_java26plus_jres().await?;
+    let _ = find_java27plus_jres().await?;
+    let _ = find_java28plus_jres().await?;
+    Ok(())
+}
+
+pub async fn find_java30plus_jres() -> crate::Result<()> {
+    let _ = find_java18plus_jres().await?;
+    let _ = find_java19plus_jres().await?;
+    let _ = find_java20plus_jres().await?;
+    let _ = find_java21plus_jres().await?;
+    let _ = find_java22plus_jres().await?;
+    let _ = find_java23plus_jres().await?;
+    let _ = find_java24plus_jres().await?;
+    let _ = find_java25plus_jres().await?;
+    let _ = find_java26plus_jres().await?;
+    let _ = find_java27plus_jres().await?;
+    let _ = find_java28plus_jres().await?;
+    let _ = find_java29plus_jres().await?;
+    Ok(())
+}
+
 // Searches for jres on the system that are 1.8 exactly
 pub async fn find_java8_jres() -> crate::Result<Vec<JavaVersion>> {
     let version = extract_java_majorminor_version("1.8")?;
@@ -149,7 +219,7 @@ pub async fn find_java17_jres() -> crate::Result<Vec<JavaVersion>> {
         .collect())
 }
 
-#[theseus_macros::debug_pin]
+
 pub async fn auto_install_java(java_version: u32) -> crate::Result<PathBuf> {
     let state = State::get().await?;
 

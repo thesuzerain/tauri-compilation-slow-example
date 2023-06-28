@@ -14,7 +14,6 @@ mod api;
 mod config;
 mod error;
 mod event;
-mod launcher;
 mod state;
 
 pub use api::*;

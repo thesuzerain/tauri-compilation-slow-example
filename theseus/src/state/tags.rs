@@ -21,7 +21,7 @@ pub struct Tags {
 
 impl Tags {
     #[tracing::instrument(skip(io_semaphore, fetch_semaphore))]
-    #[theseus_macros::debug_pin]
+    
     pub async fn init(
         dirs: &DirectoryInfo,
         io_semaphore: &IoSemaphore,
@@ -53,7 +53,7 @@ impl Tags {
     }
 
     #[tracing::instrument]
-    #[theseus_macros::debug_pin]
+    
     pub async fn update() {
         let res = async {
             let state = crate::State::get().await?;

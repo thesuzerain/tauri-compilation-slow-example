@@ -1,5 +1,4 @@
 //! Theseus error type
-use crate::profile_create;
 use tracing_error::InstrumentError;
 
 #[derive(thiserror::Error, Debug)]
@@ -24,9 +23,6 @@ pub enum ErrorKind {
 
     #[error("Minecraft authentication Hydra error: {0}")]
     HydraError(String),
-
-    #[error("Minecraft authentication task error: {0}")]
-    AuthTaskError(#[from] crate::state::AuthTaskError),
 
     #[error("I/O error: {0}")]
     IOError(#[from] std::io::Error),
@@ -63,9 +59,6 @@ pub enum ErrorKind {
 
     #[error("Profile {0} is not managed by Theseus!")]
     UnmanagedProfileError(String),
-
-    #[error("Could not create profile: {0}")]
-    ProfileCreationError(#[from] profile_create::ProfileCreationError),
 
     #[error("User is not logged in, no credentials available!")]
     NoCredentialsError,

@@ -6,7 +6,6 @@ use crate::event::emit::init_loading;
 use crate::event::LoadingBarType;
 use crate::loading_join;
 
-use crate::state::users::Users;
 use crate::util::fetch::{FetchSemaphore, IoSemaphore};
 use notify::RecommendedWatcher;
 use notify_debouncer_mini::{new_debouncer, DebounceEventResult, Debouncer};
@@ -23,22 +22,12 @@ pub use self::dirs::*;
 mod metadata;
 pub use self::metadata::*;
 
-mod profiles;
-pub use self::profiles::*;
 
 mod settings;
 pub use self::settings::*;
 
 mod projects;
 pub use self::projects::*;
-
-mod users;
-
-mod children;
-pub use self::children::*;
-
-mod auth_task;
-pub use self::auth_task::*;
 
 mod tags;
 pub use self::tags::*;
@@ -65,14 +54,6 @@ pub struct State {
     pub metadata: RwLock<Metadata>,
     /// Launcher configuration
     pub settings: RwLock<Settings>,
-    /// Reference to minecraft process children
-    pub children: RwLock<Children>,
-    /// Authentication flow
-    pub auth_flow: RwLock<AuthTask>,
-    /// Launcher profile metadata
-    pub(crate) profiles: RwLock<Profiles>,
-    /// Launcher user account info
-    pub(crate) users: RwLock<Users>,
     /// Launcher tags
     pub(crate) tags: RwLock<Tags>,
 
@@ -83,7 +64,7 @@ pub struct State {
 impl State {
     /// Get the current launcher state, initializing it if needed
     #[tracing::instrument]
-    #[theseus_macros::debug_pin]
+    
     pub async fn get() -> crate::Result<Arc<Self>> {
         LAUNCHER_STATE
             .get_or_try_init(|| {
@@ -113,25 +94,18 @@ impl State {
 
                     let metadata_fut =
                         Metadata::init(&directories, &io_semaphore);
-                    let profiles_fut =
-                        Profiles::init(&directories, &mut file_watcher);
                     let tags_fut = Tags::init(
                         &directories,
                         &io_semaphore,
                         &fetch_semaphore,
                     );
-                    let users_fut = Users::init(&directories, &io_semaphore);
                     // Launcher data
-                    let (metadata, profiles, tags, users) = loading_join! {
+                    let (metadata, tags) = loading_join! {
                         Some(&loading_bar), 70.0, Some("Loading metadata");
                         metadata_fut,
-                        profiles_fut,
                         tags_fut,
-                        users_fut,
                     }?;
 
-                    let children = Children::new();
-                    let auth_flow = AuthTask::new();
                     emit_loading(&loading_bar, 10.0, None).await?;
 
                     Ok(Arc::new(Self {
@@ -146,10 +120,6 @@ impl State {
                         ),
                         metadata: RwLock::new(metadata),
                         settings: RwLock::new(settings),
-                        profiles: RwLock::new(profiles),
-                        users: RwLock::new(users),
-                        children: RwLock::new(children),
-                        auth_flow: RwLock::new(auth_flow),
                         tags: RwLock::new(tags),
                         file_watcher: RwLock::new(file_watcher),
                     }))
@@ -163,12 +133,11 @@ impl State {
     pub fn update() {
         tokio::task::spawn(Metadata::update());
         tokio::task::spawn(Tags::update());
-        tokio::task::spawn(Profiles::update_projects());
         tokio::task::spawn(Settings::update_java());
     }
 
     #[tracing::instrument]
-    #[theseus_macros::debug_pin]
+    
     /// Synchronize in-memory state with persistent state
     pub async fn sync() -> crate::Result<()> {
         let state = Self::get().await?;
@@ -187,9 +156,6 @@ impl State {
             let state = Arc::clone(&state);
 
             tokio::spawn(async move {
-                let profiles = state.profiles.read().await;
-
-                profiles.sync().await?;
                 Ok::<_, crate::Error>(())
             })
             .await?
@@ -267,7 +233,6 @@ async fn init_watcher() -> crate::Result<Debouncer<RecommendedWatcher>> {
                         }
 
                         if !visited_paths.contains(&new_path) {
-                            Profile::sync_projects_task(new_path.clone());
                             visited_paths.push(new_path);
                         }
                     });

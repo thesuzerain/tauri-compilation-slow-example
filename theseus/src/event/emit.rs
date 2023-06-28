@@ -46,7 +46,7 @@ const CLI_PROGRESS_BAR_TOTAL: u64 = 1000;
 // This will generate a LoadingBarId, which is used to refer to the loading bar uniquely.
 // total is the total amount of work to be done- all emissions will be considered a fraction of this value (should be 1 or 100 for simplicity)
 // title is the title of the loading bar
-#[theseus_macros::debug_pin]
+
 pub async fn init_loading(
     bar_type: LoadingBarType,
     total: f64,
@@ -135,7 +135,7 @@ pub async fn edit_loading(
 // By convention, fraction is the fraction of the progress bar that is filled
 #[allow(unused_variables)]
 #[tracing::instrument(level = "debug")]
-#[theseus_macros::debug_pin]
+
 pub async fn emit_loading(
     key: &LoadingBarId,
     increment_frac: f64,
@@ -332,7 +332,7 @@ macro_rules! loading_join {
 // If message is Some(t) you will overwrite this loading bar's message with a custom one
 // num_futs is the number of futures that will be run, which is needed as we allow Iterator to be passed in, which doesn't have a size
 #[tracing::instrument(skip(stream, f))]
-#[theseus_macros::debug_pin]
+
 pub async fn loading_try_for_each_concurrent<I, F, Fut, T>(
     stream: I,
     limit: Option<usize>,
